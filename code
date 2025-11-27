@@ -1,85 +1,201 @@
-create database online_food_delivary_database_system;
-use online_food_delivary_database_system; 
-show tables;
-select * from customers;
-select * from restarunts;
-select * from food_items;
-select * from orders;
-select * from order_items;
-select * from delivery_partners;
-create table customers(
-	customer_id int primary key,
-    name varchar(100),
-    city varchar(100),
-    phone varchar(15));
-create table restarunts(
-	restarunt_id int primary key,
-    name varchar(100),
-    city varchar(100),
-    rating tinyint);
-create table food_items(
-	item_id int primary key,
-    restarunt_id int,
-    item_name varchar(100),
-    price decimal(10,2));
-create table orders(
-	order_id int primary key,
-    customer_id int,
-    restarunt_id int,
-    order_date date,
-    status varchar(100));
-create table order_items(
-	order_item_id int primary key,
-    order_id int,
-    item_id int,
-    quantity int);
-create table delivery_partners(
-	partner_id int primary key,
-    name varchar(100),
-    city varchar(100));
-    
-alter table food_items add foreign key(restarunt_id)references restarunts(restarunt_id);
-alter table orders add foreign key(customer_id)references customers(customer_id);
-alter table orders add foreign key(restarunt_id)references restarunts(restarunt_id); 
-alter table order_items add constraint foreign key(order_id) references orders(order_id);
-alter table order_items add constraint foreign key(item_id) references food_items(item_id);
-insert into customers values
+-- ******************************************************
+-- 1. CREATE DATABASE
+-- ******************************************************
+CREATE DATABASE online_food_delivary_database_system;
+USE online_food_delivary_database_system;
+
+-- ******************************************************
+-- 2. CHECK EXISTING TABLES
+-- ******************************************************
+SHOW TABLES;
+
+-- ******************************************************
+-- 3. TABLE CREATION
+-- ******************************************************
+
+-- Customers Table: Stores customer details
+CREATE TABLE customers(
+    customer_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    city VARCHAR(100),
+    phone VARCHAR(15)
+);
+
+-- Restaurants Table: Stores restaurant information
+CREATE TABLE restarunts(
+    restarunt_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    city VARCHAR(100),
+    rating TINYINT
+);
+
+-- Food Items Table: Menu items from restaurants
+CREATE TABLE food_items(
+    item_id INT PRIMARY KEY,
+    restarunt_id INT,
+    item_name VARCHAR(100),
+    price DECIMAL(10,2)
+);
+
+-- Orders Table: Stores order details
+CREATE TABLE orders(
+    order_id INT PRIMARY KEY,
+    customer_id INT,
+    restarunt_id INT,
+    order_date DATE,
+    status VARCHAR(100)
+);
+
+-- Order Items Table: Items included in each order
+CREATE TABLE order_items(
+    order_item_id INT PRIMARY KEY,
+    order_id INT,
+    item_id INT,
+    quantity INT
+);
+
+-- Delivery Partners Table: Delivery person information
+CREATE TABLE delivery_partners(
+    partner_id INT PRIMARY KEY,
+    name VARCHAR(100),
+    city VARCHAR(100)
+);
+
+-- ******************************************************
+-- 4. ADDING FOREIGN KEY CONSTRAINTS
+-- ******************************************************
+
+ALTER TABLE food_items 
+    ADD FOREIGN KEY(restarunt_id) REFERENCES restarunts(restarunt_id);
+
+ALTER TABLE orders 
+    ADD FOREIGN KEY(customer_id) REFERENCES customers(customer_id);
+
+ALTER TABLE orders 
+    ADD FOREIGN KEY(restarunt_id) REFERENCES restarunts(restarunt_id);
+
+ALTER TABLE order_items 
+    ADD CONSTRAINT FOREIGN KEY(order_id) REFERENCES orders(order_id);
+
+ALTER TABLE order_items 
+    ADD CONSTRAINT FOREIGN KEY(item_id) REFERENCES food_items(item_id);
+
+-- ******************************************************
+-- 5. INSERTING SAMPLE DATA
+-- ******************************************************
+
+-- Customer data
+INSERT INTO customers VALUES
 (1,'raju','chittoor',9703898699),
 (2,'sita','tirupathi',8732983900),
 (3,'jhon','madhanapalle',4376484733),
 (4,'lakshmi','tirupathi',76846848648);
-insert into restarunts values
+
+-- Restaurant data
+INSERT INTO restarunts VALUES
 (101,'spacehub','tirupati',4.5),
 (102,'foodies','chittoor',4.2),
 (103,'grill house','madanapalle',4.7);
-insert into food_items values
+
+-- Food items data
+INSERT INTO food_items VALUES
 (201,101,'Biriyani',180),
 (202,101,'Fried Rice',120),
 (203,102,'Dosa',50),
 (204,103,'Burger',150),
 (205,103,'Pizza',250);
-insert into orders values
+
+-- Orders data
+INSERT INTO orders VALUES
 (301,1,101,'2024-01-10','Delivered'),
 (302,2,102,'2024-01-11','Delivered'),
 (303,3,103,'2024-01-11','Pending'),
 (304,1,103,'2024-01-12','Delivered'),
 (305,4,101,'2024-01-12','Cancelled');
-insert into order_items values
+
+-- Order items data
+INSERT INTO order_items VALUES
 (401,301,201,2),
 (402,301,202,1),
 (403,302,203,3),
 (404,303,204,1),
 (405,304,205,2);
-insert into delivery_partners values
+
+-- Delivery partners data
+INSERT INTO delivery_partners VALUES
 (501,'Charan','Tirupati'),
 (502,'Manoj','Chittoor'),
 (503,'Akash','Madanapalle');
-select * from orders where status='delivered';
-select r.name ,count(*)as total_orders from orders  o join restarunts r  on o.restarunt_id=r.restarunt_id group by r.name;
-select f.item_name,sum(oi.quantity)as maximum_ordered from order_items oi join food_items f on oi.item_id=f.item_id group by f.item_name order by maximum_ordered limit 1;
-select f.restarunt_id,sum(f.price*oi.quantity)as revenue_of_restarunt from food_items f join order_items oi on f.item_id=oi.item_id group by f.restarunt_id;
-select c.name,count(order_id) as most_spent from orders o join customers c on c.customer_id=o.customer_id group by c.name limit 1;
-select * from orders where status='pending';
-select name,max(rating) as max_rating from restarunts group by name limit 1 ;
-select c.city,count(*)as total_orders from orders o join customers c on o.customer_id=c.customer_id group by c.city;
-SELECT o.order_id,f.item_name,oi.quantity FROM orders o JOIN order_items oi ON o.order_id = oi.order_id JOIN food_items f ON oi.item_id = f.item_id ORDER BY o.order_id;
+
+-- ******************************************************
+-- 6. SQL QUERIES & ANALYSIS
+-- ******************************************************
+
+-- 6.1 Get all delivered orders
+SELECT * FROM orders WHERE status = 'Delivered';
+
+-- 6.2 Count total orders per restaurant
+SELECT 
+    r.name,
+    COUNT(*) AS total_orders 
+FROM orders o 
+JOIN restarunts r ON o.restarunt_id = r.restarunt_id 
+GROUP BY r.name;
+
+-- 6.3 Find the most ordered food item
+SELECT 
+    f.item_name,
+    SUM(oi.quantity) AS maximum_ordered 
+FROM order_items oi 
+JOIN food_items f ON oi.item_id = f.item_id 
+GROUP BY f.item_name 
+ORDER BY maximum_ordered DESC 
+LIMIT 1;
+
+-- 6.4 Total revenue generated per restaurant
+SELECT 
+    f.restarunt_id,
+    SUM(f.price * oi.quantity) AS revenue_of_restarunt 
+FROM food_items f 
+JOIN order_items oi ON f.item_id = oi.item_id 
+GROUP BY f.restarunt_id;
+
+-- 6.5 Customer who placed the most orders
+SELECT 
+    c.name,
+    COUNT(order_id) AS most_spent 
+FROM orders o 
+JOIN customers c ON c.customer_id = o.customer_id 
+GROUP BY c.name 
+ORDER BY most_spent DESC 
+LIMIT 1;
+
+-- 6.6 Get all pending orders
+SELECT * FROM orders WHERE status = 'Pending';
+
+-- 6.7 Get restaurant with highest rating
+SELECT 
+    name,
+    MAX(rating) AS max_rating 
+FROM restarunts 
+GROUP BY name 
+ORDER BY max_rating DESC 
+LIMIT 1;
+
+-- 6.8 Count total orders by city
+SELECT 
+    c.city,
+    COUNT(*) AS total_orders 
+FROM orders o 
+JOIN customers c ON o.customer_id = c.customer_id 
+GROUP BY c.city;
+
+-- 6.9 List all order details with items
+SELECT 
+    o.order_id,
+    f.item_name,
+    oi.quantity 
+FROM orders o 
+JOIN order_items oi ON o.order_id = oi.order_id 
+JOIN food_items f ON oi.item_id = f.item_id 
+ORDER BY o.order_id;
