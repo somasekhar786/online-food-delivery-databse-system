@@ -1,0 +1,85 @@
+create database online_food_delivary_database_system;
+use online_food_delivary_database_system; 
+show tables;
+select * from customers;
+select * from restarunts;
+select * from food_items;
+select * from orders;
+select * from order_items;
+select * from delivery_partners;
+create table customers(
+	customer_id int primary key,
+    name varchar(100),
+    city varchar(100),
+    phone varchar(15));
+create table restarunts(
+	restarunt_id int primary key,
+    name varchar(100),
+    city varchar(100),
+    rating tinyint);
+create table food_items(
+	item_id int primary key,
+    restarunt_id int,
+    item_name varchar(100),
+    price decimal(10,2));
+create table orders(
+	order_id int primary key,
+    customer_id int,
+    restarunt_id int,
+    order_date date,
+    status varchar(100));
+create table order_items(
+	order_item_id int primary key,
+    order_id int,
+    item_id int,
+    quantity int);
+create table delivery_partners(
+	partner_id int primary key,
+    name varchar(100),
+    city varchar(100));
+    
+alter table food_items add foreign key(restarunt_id)references restarunts(restarunt_id);
+alter table orders add foreign key(customer_id)references customers(customer_id);
+alter table orders add foreign key(restarunt_id)references restarunts(restarunt_id); 
+alter table order_items add constraint foreign key(order_id) references orders(order_id);
+alter table order_items add constraint foreign key(item_id) references food_items(item_id);
+insert into customers values
+(1,'raju','chittoor',9703898699),
+(2,'sita','tirupathi',8732983900),
+(3,'jhon','madhanapalle',4376484733),
+(4,'lakshmi','tirupathi',76846848648);
+insert into restarunts values
+(101,'spacehub','tirupati',4.5),
+(102,'foodies','chittoor',4.2),
+(103,'grill house','madanapalle',4.7);
+insert into food_items values
+(201,101,'Biriyani',180),
+(202,101,'Fried Rice',120),
+(203,102,'Dosa',50),
+(204,103,'Burger',150),
+(205,103,'Pizza',250);
+insert into orders values
+(301,1,101,'2024-01-10','Delivered'),
+(302,2,102,'2024-01-11','Delivered'),
+(303,3,103,'2024-01-11','Pending'),
+(304,1,103,'2024-01-12','Delivered'),
+(305,4,101,'2024-01-12','Cancelled');
+insert into order_items values
+(401,301,201,2),
+(402,301,202,1),
+(403,302,203,3),
+(404,303,204,1),
+(405,304,205,2);
+insert into delivery_partners values
+(501,'Charan','Tirupati'),
+(502,'Manoj','Chittoor'),
+(503,'Akash','Madanapalle');
+select * from orders where status='delivered';
+select r.name ,count(*)as total_orders from orders  o join restarunts r  on o.restarunt_id=r.restarunt_id group by r.name;
+select f.item_name,sum(oi.quantity)as maximum_ordered from order_items oi join food_items f on oi.item_id=f.item_id group by f.item_name order by maximum_ordered limit 1;
+select f.restarunt_id,sum(f.price*oi.quantity)as revenue_of_restarunt from food_items f join order_items oi on f.item_id=oi.item_id group by f.restarunt_id;
+select c.name,count(order_id) as most_spent from orders o join customers c on c.customer_id=o.customer_id group by c.name limit 1;
+select * from orders where status='pending';
+select name,max(rating) as max_rating from restarunts group by name limit 1 ;
+select c.city,count(*)as total_orders from orders o join customers c on o.customer_id=c.customer_id group by c.city;
+SELECT o.order_id,f.item_name,oi.quantity FROM orders o JOIN order_items oi ON o.order_id = oi.order_id JOIN food_items f ON oi.item_id = f.item_id ORDER BY o.order_id;
